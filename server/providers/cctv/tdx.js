@@ -103,7 +103,7 @@ export function inferTdxFeedType(url) {
   const text = String(url || '').trim().toLowerCase();
   if (!text) return 'image';
   if (
-    text.includes('/mjpg/') ||
+    text.includes('mjpg') ||
     text.includes('mjpeg') ||
     /video\.cgi(?:\?|$)/.test(text)
   )
