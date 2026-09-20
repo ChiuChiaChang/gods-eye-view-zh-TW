@@ -50,6 +50,22 @@ function cleanSegment(value) {
     .replace(/^_+|_+$/g, '');
 }
 
+function tdxDirectionHeading(value) {
+  const text = String(value || '').trim().toUpperCase();
+  const compact = {
+    N: 0,
+    NE: 45,
+    E: 90,
+    SE: 135,
+    S: 180,
+    SW: 225,
+    W: 270,
+    NW: 315,
+  };
+  if (Object.hasOwn(compact, text)) return compact[text];
+  return directionToHeading(text, true);
+}
+
 function cityLabel(scope, authorityCode) {
   const authority = String(authorityCode || '').trim().toUpperCase();
   const byAuthority = {
@@ -209,7 +225,7 @@ export function tdxCameraToSource(row, { scope = 'Taiwan' } = {}) {
   const roadDirection = String(
     row.RoadDirection ?? row.roadDirection ?? '',
   ).trim();
-  const parsedHeading = directionToHeading(roadDirection, true);
+  const parsedHeading = tdxDirectionHeading(roadDirection);
   const scopeId = cleanSegment(scope).toLowerCase() || 'tw';
   const sourceId = cleanSegment(rawId) || 'camera';
   const id = `tw-tdx-${scopeId}-${sourceId}`;
