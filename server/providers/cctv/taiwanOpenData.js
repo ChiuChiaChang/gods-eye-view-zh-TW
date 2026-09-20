@@ -17,12 +17,17 @@ const TAIWAN_OPEN_DATA_PAGE_SIZE = 2000;
 const TAIWAN_OPEN_DATA_MAX_PAGES_PER_LAYER = 8;
 const DEFAULT_TAIWAN_OPEN_DATA_MAX_SOURCES = 1500;
 const TAIWAN_ANCHORS = Object.freeze([
+  { lat: 25.1283, lon: 121.7419 }, // Keelung
   { lat: 25.033, lon: 121.5654 }, // Taipei
+  { lat: 25.012, lon: 121.4657 }, // New Taipei
   { lat: 24.9937, lon: 121.301 }, // Taoyuan
+  { lat: 24.8138, lon: 120.9675 }, // Hsinchu
+  { lat: 24.757, lon: 121.753 }, // Yilan
   { lat: 24.1477, lon: 120.6736 }, // Taichung
   { lat: 23.4801, lon: 120.4491 }, // Chiayi
   { lat: 22.9999, lon: 120.227 }, // Tainan
   { lat: 22.6273, lon: 120.3014 }, // Kaohsiung
+  { lat: 22.672, lon: 120.488 }, // Pingtung
 ]);
 
 function positiveInt(value, fallback, min = 1, max = 10000) {
@@ -91,9 +96,15 @@ function validHttpUrl(value) {
   }
 }
 
-export function taiwanArcgisFeatureToSource(feature, { layerName = 'Taiwan' } = {}) {
+export function taiwanArcgisFeatureToSource(
+  feature,
+  { layerId = 'x', layerName = 'Taiwan' } = {},
+) {
   const attrs = attrMap(feature?.attributes);
-  const rawId = String(attrs.cctvid || attrs.uniqueid || attrs.id || '').trim();
+  const cameraCode = String(attrs.cctvid || '').trim();
+  const rawId = String(
+    attrs.uniqueid || cameraCode || attrs.id || '',
+  ).trim();
   if (!rawId) return null;
 
   const lat = Number(attrs.positionlat ?? feature?.geometry?.y);
@@ -105,7 +116,12 @@ export function taiwanArcgisFeatureToSource(feature, { layerName = 'Taiwan' } = 
   const primaryUrl = streamUrl || imageUrl;
   if (!primaryUrl) return null;
 
-  const id = `tw-open-${cleanId(rawId) || 'camera'}`;
+  // CCTVID values such as C000001 are NOT globally unique across the 13
+  // authority layers. Layer-scoping prevents Taipei/New Taipei/etc. records
+  // from overwriting cameras with the same provider-local code.
+  const id = `tw-open-l${cleanId(layerId) || 'x'}-${
+    cleanId(rawId) || cleanId(cameraCode) || 'camera'
+  }`;
   const roadDirection = String(attrs.roaddirection || '').trim();
   const parsedHeading = directionHeading(roadDirection);
   const hasHeading = Number.isFinite(parsedHeading);
@@ -139,7 +155,7 @@ export function taiwanArcgisFeatureToSource(feature, { layerName = 'Taiwan' } = 
     sourceKind: 'taiwan-open-data',
     license: 'Taiwan Government Open Data Licence 1.0 / source-authority terms',
     credit: '交通部 TDX / 運輸資料 GIS 公開服務',
-    code: rawId,
+    code: cameraCode || rawId,
   };
 }
 
@@ -221,6 +237,38 @@ async function fetchLayerFeatures(serviceUrl, layer, fetchImpl) {
   return features;
 }
 
+function roundRobinLayerCameras(layerCameras, maxCount) {
+  const lanes = layerCameras
+    .map((entry) => ({
+      layer: entry.layer,
+      cameras: prioritizeSources(entry.cameras, entry.cameras.length, TAIWAN_ANCHORS),
+      index: 0,
+    }))
+    .filter((entry) => entry.cameras.length > 0);
+
+  const total = lanes.reduce((sum, lane) => sum + lane.cameras.length, 0);
+  const limit = Math.min(maxCount, total);
+  const out = [];
+  const seen = new Set();
+
+  while (out.length < limit) {
+    let advanced = false;
+    for (const lane of lanes) {
+      while (lane.index < lane.cameras.length) {
+        const camera = lane.cameras[lane.index++];
+        if (!camera?.id || seen.has(camera.id)) continue;
+        seen.add(camera.id);
+        out.push(camera);
+        advanced = true;
+        break;
+      }
+      if (out.length >= limit) break;
+    }
+    if (!advanced) break;
+  }
+  return out;
+}
+
 export async function loadTaiwanOpenDataCctvSources({
   env = process.env,
   fetchImpl = fetch,
@@ -257,7 +305,8 @@ export async function loadTaiwanOpenDataCctvSources({
       })),
     );
 
-    const cameras = [];
+    const layerCameras = [];
+    let rawCameraCount = 0;
     for (const result of settled) {
       if (result.status !== 'fulfilled') {
         console.warn(
@@ -266,28 +315,47 @@ export async function loadTaiwanOpenDataCctvSources({
         );
         continue;
       }
+
+      const cameras = [];
+      const layerId = String(result.value.layer?.id ?? 'x');
+      const layerName = result.value.layer?.name || 'Taiwan';
       for (const feature of result.value.features) {
         const camera = taiwanArcgisFeatureToSource(feature, {
-          layerName: result.value.layer?.name || 'Taiwan',
+          layerId,
+          layerName,
         });
         if (camera) cameras.push(camera);
       }
+      rawCameraCount += cameras.length;
+      layerCameras.push({
+        layer: result.value.layer,
+        cameras: Array.from(
+          new Map(cameras.map((camera) => [camera.id, camera])).values(),
+        ),
+      });
     }
 
-    const unique = Array.from(
-      new Map(cameras.map((camera) => [camera.id, camera])).values(),
-    );
     const maxCount = positiveInt(
       env?.CCTV_TAIWAN_MAX_SOURCES,
       DEFAULT_TAIWAN_OPEN_DATA_MAX_SOURCES,
       8,
       3000,
     );
-    const prioritized = prioritizeSources(unique, maxCount, TAIWAN_ANCHORS);
+    // Preserve every authority/region under the cap instead of sorting the
+    // whole island into one list. One camera is taken from each layer per pass,
+    // so 屏東/高雄 can never crowd out 新北/台北/桃園/新竹/宜蘭.
+    const distributed = roundRobinLayerCameras(layerCameras, maxCount);
+    const layerSummary = layerCameras
+      .filter((entry) => entry.cameras.length)
+      .map(
+        (entry) =>
+          `${entry.layer?.name || entry.layer?.id || '?'}:${entry.cameras.length}`,
+      )
+      .join(', ');
     console.log(
-      `[CCTV] Loaded Taiwan open-data cameras: ${prioritized.length}/${unique.length}`,
+      `[CCTV] Loaded Taiwan open-data cameras: ${distributed.length}/${rawCameraCount} across ${layerCameras.length} layers (${layerSummary})`,
     );
-    return prioritized;
+    return distributed;
   } catch (error) {
     console.warn(
       '[CCTV] Taiwan open-data catalog error:',
