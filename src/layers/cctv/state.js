@@ -58,9 +58,11 @@ export function createState({ services }) {
 
   layerState._lastError = null;
 
-  // Taiwan TDX provider status (reported by /api/cctv/sources).
+  // Taiwan provider status (reported by /api/cctv/sources).
   layerState._tdxConfigured = false;
   layerState._tdxCount = 0;
+  layerState._taiwanOpenDataCount = 0;
+  layerState._taiwanCount = 0;
 
   layerState._healthById = new Map();
 
