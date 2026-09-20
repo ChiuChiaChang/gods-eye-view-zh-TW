@@ -20,6 +20,7 @@ const PANEL_GROUPS = [
       'satellites',
       'flights',
       'military',
+      'cctv',
       'ais-live-vessels',
       'traffic',
       'transit',
@@ -28,7 +29,7 @@ const PANEL_GROUPS = [
   },
   {
     label: 'Cameras',
-    ids: ['cctv', 'alpr-cameras'],
+    ids: ['alpr-cameras'],
   },
   {
     label: 'Infrastructure',
@@ -57,7 +58,7 @@ const PANEL_POSITIONS = new Map(
 const PANEL_LABELS = {
   'ais-live-vessels': 'Live Vessels',
   bikeshare: 'Bike Share',
-  cctv: 'Cameras',
+  cctv: '🇹🇼 Taiwan CCTV',
   'alpr-cameras': 'Mapped ALPR Cameras',
   'local-datacenters': 'Data Centers',
   'local-firms': 'Active Fires',
