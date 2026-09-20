@@ -145,11 +145,26 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
           const tdxCount = sources.filter(
             (source) => source?.sourceKind === 'tdx-taiwan-cctv',
           ).length;
+          const taiwanOpenDataCount = sources.filter(
+            (source) => source?.sourceKind === 'taiwan-open-data',
+          ).length;
+          const taiwanCount = sources.filter((source) =>
+            ['tdx-taiwan-cctv', 'taiwan-open-data'].includes(
+              source?.sourceKind,
+            ),
+          ).length;
           const body = {
             providers: {
+              taiwanOpenData: {
+                configured: true,
+                count: taiwanOpenDataCount,
+              },
               tdx: {
                 configured: tdxConfigured,
                 count: tdxCount,
+              },
+              taiwan: {
+                count: taiwanCount,
               },
             },
             sources: sources.map((source) => ({
