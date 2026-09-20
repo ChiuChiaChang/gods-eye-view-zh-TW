@@ -389,10 +389,13 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
             : '');
 
         const sourceFeedType = normalizeFeedType(source?.feedType);
+        const hasDedicatedSnapshot =
+          Boolean(source?.snapshotUrl) &&
+          String(source.snapshotUrl) !== String(source?.url || '');
         const upstreamImage =
           source?.sourceKind === 'txdot-its'
             ? await fetchTxdotSnapshot(upstreamCandidate)
-            : sourceFeedType === 'mjpeg'
+            : sourceFeedType === 'mjpeg' && !hasDedicatedSnapshot
               ? await fetchMjpegFrameFromUpstream(upstreamCandidate)
               : await fetchCctvImageFromUpstream(upstreamCandidate);
         if (upstreamImage?.ok) {
