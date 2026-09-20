@@ -281,6 +281,37 @@ export function createFrames({ state: layerState, services, parts, source }) {
 
     const health = layerState._healthById.get(record.camera.id) || null;
 
+    if (runtime.mode === 'mjpeg' && runtime.image) {
+      const image = runtime.image;
+      if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+        const now = performance.now();
+        // The monitor plane texture swap is already throttled separately; draw
+        // the live MJPEG into its canvas at a modest cadence to avoid burning
+        // the main thread while still looking live.
+        if (now - (runtime.lastMjpegDrawAt || 0) >= 250) {
+          runtime.lastMjpegDrawAt = now;
+          runtime.ctx.clearRect(
+            0,
+            0,
+            PROJECTION_CANVAS_WIDTH,
+            PROJECTION_CANVAS_HEIGHT,
+          );
+          runtime.ctx.drawImage(
+            image,
+            0,
+            0,
+            PROJECTION_CANVAS_WIDTH,
+            PROJECTION_CANVAS_HEIGHT,
+          );
+          runtime.canvasStamp = (runtime.canvasStamp || 0) + 1;
+          runtime.lastPlaceholderPaintAt = 0;
+        }
+        return;
+      }
+      paintPlaceholderThrottled(record, runtime, health);
+      return;
+    }
+
     if (runtime.mode === 'video' && runtime.video) {
       const video = runtime.video;
       if (
