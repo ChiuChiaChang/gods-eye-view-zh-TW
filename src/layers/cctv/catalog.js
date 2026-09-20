@@ -89,6 +89,16 @@ export function createCatalog({ state: layerState, services, parts, source }) {
       layerState._tdxCount = Number.isFinite(Number(data?.providers?.tdx?.count))
         ? Math.max(0, Number(data.providers.tdx.count))
         : 0;
+      layerState._taiwanOpenDataCount = Number.isFinite(
+        Number(data?.providers?.taiwanOpenData?.count),
+      )
+        ? Math.max(0, Number(data.providers.taiwanOpenData.count))
+        : 0;
+      layerState._taiwanCount = Number.isFinite(
+        Number(data?.providers?.taiwan?.count),
+      )
+        ? Math.max(0, Number(data.providers.taiwan.count))
+        : layerState._taiwanOpenDataCount + layerState._tdxCount;
       if (!Array.isArray(data?.sources)) return [];
       return data.sources;
     } catch (error) {
