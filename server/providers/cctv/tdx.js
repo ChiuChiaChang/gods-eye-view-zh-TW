@@ -111,7 +111,7 @@ export function buildTdxCctvEndpoints(env = process.env) {
     endpoints.push({ scope: 'Highway', url: `${base}/Road/Traffic/CCTV/Highway` });
 
   const cities = String(
-    env?.TDX_CCTV_CITIES || DEFAULT_TDX_CCTV_CITIES.join(','),
+    env?.TDX_CCTV_CITIES ?? DEFAULT_TDX_CCTV_CITIES.join(','),
   )
     .split(',')
     .map((city) => city.trim())
