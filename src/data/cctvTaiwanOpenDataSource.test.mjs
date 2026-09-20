@@ -24,7 +24,7 @@ const FEATURE = {
 };
 
 test('Taiwan ArcGIS feature maps to a keyless live CCTV source', () => {
-  const camera = taiwanArcgisFeatureToSource(FEATURE, { layerName: '臺北市' });
+  const camera = taiwanArcgisFeatureToSource(FEATURE, { layerId: 8, layerName: '臺北市' });
   assert.ok(camera);
   assert.equal(camera.sourceKind, 'taiwan-open-data');
   assert.equal(camera.provider, 'Taiwan MOTC Open Data');
@@ -36,7 +36,7 @@ test('Taiwan ArcGIS feature maps to a keyless live CCTV source', () => {
     camera.snapshotUrl,
     'https://cctvn.freeway.gov.tw/snapshots/camera1096.jpg',
   );
-  assert.match(camera.id, /^tw-open-/);
+  assert.match(camera.id, /^tw-open-l8-/);
 });
 
 test('Taiwan ArcGIS loader needs no TDX credentials', async () => {
@@ -72,4 +72,32 @@ test('Taiwan ArcGIS loader needs no TDX credentials', async () => {
     seen.some((url) => url.includes('/8/query?')),
     'layer query should run',
   );
+});
+
+
+test('same provider-local CCTVID in different authority layers stays distinct', () => {
+  const taipei = taiwanArcgisFeatureToSource(FEATURE, {
+    layerId: 8,
+    layerName: '台北',
+  });
+  const kaohsiung = taiwanArcgisFeatureToSource(
+    {
+      ...FEATURE,
+      attributes: {
+        ...FEATURE.attributes,
+        uniqueid: '',
+        cctvid: FEATURE.attributes.cctvid,
+        city: '高雄市',
+        positionlon: '120.3014',
+        positionlat: '22.6273',
+      },
+      geometry: { x: 120.3014, y: 22.6273 },
+    },
+    { layerId: 1, layerName: '高雄' },
+  );
+  assert.ok(taipei);
+  assert.ok(kaohsiung);
+  assert.notEqual(taipei.id, kaohsiung.id);
+  assert.match(taipei.id, /^tw-open-l8-/);
+  assert.match(kaohsiung.id, /^tw-open-l1-/);
 });
