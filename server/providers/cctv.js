@@ -138,7 +138,20 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
         const url = new URL(req.url || '/', 'http://localhost');
 
         if (url.pathname === '/sources') {
+          const tdxConfigured = Boolean(
+            String(process.env.TDX_CLIENT_ID || '').trim() &&
+              String(process.env.TDX_CLIENT_SECRET || '').trim(),
+          );
+          const tdxCount = sources.filter(
+            (source) => source?.sourceKind === 'tdx-taiwan-cctv',
+          ).length;
           const body = {
+            providers: {
+              tdx: {
+                configured: tdxConfigured,
+                count: tdxCount,
+              },
+            },
             sources: sources.map((source) => ({
               id: source.id,
               name: source.name,
