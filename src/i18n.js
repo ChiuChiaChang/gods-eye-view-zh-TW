@@ -2,7 +2,7 @@
 // Version: 1.0.0
 // Keeps upstream application logic/data untouched and translates only curated UI text.
 
-export const GEV_ZH_TW_VERSION = '1.0.1';
+export const GEV_ZH_TW_VERSION = '1.0.2';
 export const GEV_LANGUAGE_STORAGE_KEY = 'gev:ui-language:v1';
 
 const TEXT = Object.freeze({
@@ -198,6 +198,16 @@ const TEXT = Object.freeze({
   "Dams": "水壩",
   "Submarine Cables": "海底電纜",
   "FIRMS Active Fires": "FIRMS 活躍火災",
+  "TAIWAN TDX": "台灣 TDX",
+  "Taiwan live traffic cameras — freeways, highways and major cities": "台灣即時交通攝影機 — 國道、省道與主要城市",
+  "Taiwan Freeway": "台灣國道",
+  "Taiwan Highway": "台灣省道",
+  "Taipei": "台北",
+  "New Taipei": "新北",
+  "Taoyuan": "桃園",
+  "Taichung": "台中",
+  "Tainan": "台南",
+  "Kaohsiung": "高雄",
 });
 
 const ATTR = Object.freeze({
