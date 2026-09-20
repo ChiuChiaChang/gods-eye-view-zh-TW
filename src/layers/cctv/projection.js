@@ -176,7 +176,12 @@ export function createProjection({
     const ctx = canvas.getContext('2d', { alpha: true });
 
     const feedType = parts.model.normalizeFeedType(record.camera.feedType);
-    const mode = parts.model.isVideoFeedType(feedType) ? 'video' : 'image';
+    const mode =
+      feedType === 'mjpeg'
+        ? 'mjpeg'
+        : parts.model.isVideoFeedType(feedType)
+          ? 'video'
+          : 'image';
     const runtime = {
       mode,
       canvas,
@@ -228,15 +233,22 @@ export function createProjection({
       const img = new Image();
       img.decoding = 'async';
       img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        runtime.imageLoading = false;
-        runtime.imageReady = true;
-        runtime.imageStamp = Date.now();
-      };
-      img.onerror = () => {
-        runtime.imageLoading = false;
-        runtime.imageReady = false;
-      };
+      if (mode === 'mjpeg') {
+        // MJPEG is an endless multipart image stream. Chromium can render it
+        // in <img>, while the same-origin media proxy keeps mixed-content and
+        // provider CORS out of the browser.
+        img.src = parts.frames.mediaUrlFor(record.camera);
+      } else {
+        img.onload = () => {
+          runtime.imageLoading = false;
+          runtime.imageReady = true;
+          runtime.imageStamp = Date.now();
+        };
+        img.onerror = () => {
+          runtime.imageLoading = false;
+          runtime.imageReady = false;
+        };
+      }
       runtime.image = img;
     }
 
@@ -292,6 +304,9 @@ export function createProjection({
       runtime.video.pause();
       runtime.video.removeAttribute('src');
       runtime.video.load();
+    }
+    if (runtime.mode === 'mjpeg' && runtime.image) {
+      runtime.image.removeAttribute('src');
     }
     if (runtime.planeEntity && layerState._viewer) {
       layerState._viewer.entities.remove(runtime.planeEntity);
@@ -357,15 +372,26 @@ export function createProjection({
 
   function pauseInactiveProjectionFeeds(activeId) {
     for (const record of layerState._records) {
-      if (!record.projection?.video) continue;
-      if (
+      const runtime = record.projection;
+      if (!runtime) continue;
+      const active =
         record.camera.id === activeId &&
         layerState._enabled &&
-        layerState._showProjection
-      ) {
-        record.projection.video.play().catch(() => {});
-      } else {
-        record.projection.video.pause();
+        layerState._showProjection;
+
+      if (runtime.video) {
+        if (active) runtime.video.play().catch(() => {});
+        else runtime.video.pause();
+      }
+
+      if (runtime.mode === 'mjpeg' && runtime.image) {
+        if (active) {
+          if (!runtime.image.getAttribute('src'))
+            runtime.image.src = parts.frames.mediaUrlFor(record.camera);
+        } else if (runtime.image.getAttribute('src')) {
+          // Closing the <img> request releases the server-side MJPEG proxy too.
+          runtime.image.removeAttribute('src');
+        }
       }
     }
   }
