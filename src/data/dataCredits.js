@@ -137,6 +137,13 @@ export const DATA_CREDITS = [
       '<a href="https://its.txdot.gov/" target="_blank" rel="noopener">Texas Department of Transportation</a> (courtesy)',
   },
   {
+    key: 'tdx-taiwan-cctv',
+    html:
+      'CCTV cameras &amp; live streams (Taiwan): ' +
+      '<a href="https://tdx.transportdata.tw/" target="_blank" rel="noopener">TDX — Ministry of Transportation and Communications, Taiwan</a> ' +
+      '(source-authority terms and Taiwan Government Open Data Licence apply where published)',
+  },
+  {
     key: 'caltrans-cctv',
     html:
       'CCTV cameras &amp; frames (California): Caltrans — ' +
