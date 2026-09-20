@@ -325,6 +325,12 @@ function zhDynamic(text) {
   match = text.match(/^Error:\s*(.+)$/);
   if (match) return `錯誤：${match[1]}`;
 
+  match = text.match(/^TAIWAN LIVE · (\d+) cameras · TDX enhanced$/);
+  if (match) return `台灣即時 · ${match[1]} 支攝影機 · TDX 增強`;
+
+  match = text.match(/^TAIWAN LIVE · (\d+) cameras · no key required$/);
+  if (match) return `台灣即時 · ${match[1]} 支攝影機 · 不需金鑰`;
+
   match = text.match(/^Location:\s*(.+)$/);
   if (match) return `位置：${match[1]}`;
 
