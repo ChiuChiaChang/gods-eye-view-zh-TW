@@ -2,7 +2,7 @@
 
 這是 [bilawalsidhu/gods-eye-view](https://github.com/bilawalsidhu/gods-eye-view) 的繁體中文 Fork。核心地圖、資料來源與功能維持上游設計，另外加入 **繁體中文 UI（預設）** 與 **English 語言切換**。
 
-**繁中 UI 版本：1.0.3**
+**繁中 UI 版本：1.0.4**
 
 ## 🚀 繁中版快速安裝
 
@@ -22,7 +22,7 @@ npm run dev
 
 ## 🇹🇼 Taiwan TDX 即時交通攝影機
 
-此 Fork 已加入 **Taiwan TDX CCTV Pack**。設定 TDX Client Id / Client Secret 後，CCTV 圖層會額外載入：
+此 Fork 已加入 **Taiwan CCTV Pack**。**1.0.4 起不需要 TDX Key 就能先載入交通部公開 GIS CCTV 資料**；設定 TDX Client Id / Client Secret 後，可再啟用 TDX API 作為增強來源：
 
 - 高速公路局 Freeway CCTV
 - 公路局 Highway CCTV
@@ -30,7 +30,7 @@ npm run dev
 - MJPEG 即時串流支援，並可擷取第一個 JPEG frame 作為 CCTV 卡片預覽
 - Taipei 預設位置，方便快速飛到台灣測試
 
-最簡單的設定方式是在程式右下角按 **功能設定 / POWER UP**，找到 **台灣 TDX / TAIWAN TDX**，貼入：
+TDX 已改為選用。若你要啟用 TDX API 增強來源，可在程式右下角按 **功能設定 / POWER UP**，找到 **台灣 TDX / TAIWAN TDX**，貼入：
 
 ```text
 TDX_CLIENT_ID
@@ -55,6 +55,13 @@ TDX 會員與 API 金鑰申請入口：<https://tdx.transportdata.tw/>
 > Client Secret 只由本機 server 使用。不要 commit `.env`，也不要把 Secret 放到 GitHub。
 
 ## 🧩 繁中版更新紀錄
+
+### 1.0.4
+- 新增交通部公開 GIS CCTV provider，**不需要 TDX Client Id / Secret** 即可載入台灣 CCTV。
+- 修正 `3.4K` 誤顯示為台灣 Camera 數量；現在 row 顯示真正的 Taiwan camera count。
+- 修正台灣 MJPEG `abs2mjpg/bmjpg` URL 辨識。
+- 分離 `VideoStreamURL` 與 `VideoImageURL`，避免靜態預覽被誤當成 MJPEG 而出現 Load fail。
+- TDX Key 改為選用的增強來源，不再是台灣 CCTV 的必要條件。
 
 ### 1.0.3
 - 將 `🇹🇼 台灣 CCTV` 移到資料圖層上方，打開面板即可看到。
