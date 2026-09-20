@@ -85,6 +85,10 @@ export function createCatalog({ state: layerState, services, parts, source }) {
       const signal = layerState._sourceAbort?.signal;
       const data = await source.getCatalog({ signal });
       signal?.throwIfAborted();
+      layerState._tdxConfigured = data?.providers?.tdx?.configured === true;
+      layerState._tdxCount = Number.isFinite(Number(data?.providers?.tdx?.count))
+        ? Math.max(0, Number(data.providers.tdx.count))
+        : 0;
       if (!Array.isArray(data?.sources)) return [];
       return data.sources;
     } catch (error) {
