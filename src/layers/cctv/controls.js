@@ -19,8 +19,6 @@ export function createControls({ state: layerState, services, parts, source }) {
 
     source: 'TDX Taiwan + global CCTV',
 
-    requiresKeyId: 'tdx',
-
     updateInterval: DEFAULT_UPDATE_INTERVAL_MS,
 
     /**
@@ -241,16 +239,32 @@ export function createControls({ state: layerState, services, parts, source }) {
     getStats() {
       const tdxReady = layerState._tdxConfigured === true;
       const tdxCount = Math.max(0, Number(layerState._tdxCount) || 0);
+      const openDataCount = Math.max(
+        0,
+        Number(layerState._taiwanOpenDataCount) || 0,
+      );
+      const taiwanCount = Math.max(
+        0,
+        Number(layerState._taiwanCount) || openDataCount + tdxCount,
+      );
       return {
         count: layerState._count,
+        countLabel: taiwanCount > 0 ? String(taiwanCount) : '—',
         lastUpdate: layerState._lastUpdate,
         error: layerState._lastError,
-        keyRequired: !tdxReady,
-        loadingLabel: tdxReady
-          ? `TDX READY · ${tdxCount} Taiwan cameras`
-          : 'TDX KEY REQUIRED · open POWER UP',
+        keyRequired: false,
+        loadingLabel:
+          taiwanCount > 0
+            ? tdxReady
+              ? `TAIWAN LIVE · ${taiwanCount} cameras · TDX enhanced`
+              : `TAIWAN LIVE · ${taiwanCount} cameras · no key required`
+            : tdxReady
+              ? 'Taiwan camera catalog returned 0 records'
+              : 'Taiwan open data loading · TDX optional',
         tdxConfigured: tdxReady,
         tdxCount,
+        taiwanOpenDataCount: openDataCount,
+        taiwanCount,
         loading: layerState._geoLoading,
         loadingLoaded: Math.min(
           layerState._geoLoadDone,
