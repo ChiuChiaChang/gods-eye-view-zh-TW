@@ -2,7 +2,7 @@
 // Version: 1.0.0
 // Keeps upstream application logic/data untouched and translates only curated UI text.
 
-export const GEV_ZH_TW_VERSION = '1.0.2';
+export const GEV_ZH_TW_VERSION = '1.0.3';
 export const GEV_LANGUAGE_STORAGE_KEY = 'gev:ui-language:v1';
 
 const TEXT = Object.freeze({
@@ -202,6 +202,9 @@ const TEXT = Object.freeze({
   "Taiwan live traffic cameras — freeways, highways and major cities": "台灣即時交通攝影機 — 國道、省道與主要城市",
   "Taiwan Freeway": "台灣國道",
   "Taiwan Highway": "台灣省道",
+  "🇹🇼 Taiwan CCTV": "🇹🇼 台灣 CCTV",
+  "TDX Taiwan + global CCTV": "TDX 台灣 + 全球 CCTV",
+  "TDX KEY REQUIRED · open POWER UP": "需要 TDX 金鑰 · 請開啟功能設定",
   "Taipei": "台北",
   "New Taipei": "新北",
   "Taoyuan": "桃園",
