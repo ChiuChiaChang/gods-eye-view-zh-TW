@@ -66,10 +66,11 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
   /** Build a JSON payload describing stream info (feedType, URLs) for a camera. */
   const buildStreamPayload = (source, cameraId) => {
     const feedType = normalizeFeedType(source?.feedType || 'image');
+    const liveMedia = isVideoFeedType(feedType) || feedType === 'mjpeg';
     return {
       id: cameraId,
       feedType,
-      mediaUrl: isVideoFeedType(feedType)
+      mediaUrl: liveMedia
         ? `/api/cctv/media/${encodeURIComponent(cameraId)}`
         : null,
       frameUrl: `/api/cctv/frame/${encodeURIComponent(cameraId)}`,
@@ -271,13 +272,14 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
               return;
             }
 
-            if (
-              isVideoFeedType(feedType) &&
-              !(
-                contentType.startsWith('video/') ||
-                contentType.includes('mpegurl')
-              )
-            ) {
+            const liveMedia =
+              isVideoFeedType(feedType) || feedType === 'mjpeg';
+            const expectedLiveType =
+              contentType.startsWith('video/') ||
+              contentType.includes('mpegurl') ||
+              (feedType === 'mjpeg' &&
+                contentType.toLowerCase().includes('multipart/x-mixed-replace'));
+            if (liveMedia && !expectedLiveType) {
               setHealth(cameraId, {
                 status: 'degraded',
                 sourceKind: 'upstream',
@@ -287,9 +289,9 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
             } else {
               setHealth(cameraId, {
                 status: 'ok',
-                sourceKind: isVideoFeedType(feedType) ? 'live' : 'snapshot',
+                sourceKind: liveMedia ? 'live' : 'snapshot',
                 label: source?.provider || 'Configured source',
-                message: isVideoFeedType(feedType)
+                message: liveMedia
                   ? 'Live stream connected'
                   : 'Snapshot feed connected',
               });
