@@ -2,7 +2,7 @@
 
 這是 [bilawalsidhu/gods-eye-view](https://github.com/bilawalsidhu/gods-eye-view) 的繁體中文 Fork。核心地圖、資料來源與功能維持上游設計，另外加入 **繁體中文 UI（預設）** 與 **English 語言切換**。
 
-**繁中 UI 版本：1.0.1**
+**繁中 UI 版本：1.0.2**
 
 ## 🚀 繁中版快速安裝
 
@@ -20,7 +20,48 @@ npm run dev
 
 > 本 Fork 保留原專案授權與來源聲明。上游專案的新功能可透過 GitHub 的 **Sync fork** 同步；若上游 UI 有新增英文文字，繁中語系層可以再補上翻譯。
 
+## 🇹🇼 Taiwan TDX 即時交通攝影機
+
+此 Fork 已加入 **Taiwan TDX CCTV Pack**。設定 TDX Client Id / Client Secret 後，CCTV 圖層會額外載入：
+
+- 高速公路局 Freeway CCTV
+- 公路局 Highway CCTV
+- 台北、新北、桃園、台中、台南、高雄 CCTV（可用 `TDX_CCTV_CITIES` 調整）
+- MJPEG 即時串流支援，並可擷取第一個 JPEG frame 作為 CCTV 卡片預覽
+- Taipei 預設位置，方便快速飛到台灣測試
+
+最簡單的設定方式是在程式右下角按 **功能設定 / POWER UP**，找到 **台灣 TDX / TAIWAN TDX**，貼入：
+
+```text
+TDX_CLIENT_ID
+TDX_CLIENT_SECRET
+```
+
+也可以手動建立 repo 根目錄的 `.env`：
+
+```env
+TDX_CLIENT_ID=你的ClientId
+TDX_CLIENT_SECRET=你的ClientSecret
+
+CCTV_TDX_ENABLED=1
+TDX_CCTV_INCLUDE_FREEWAY=1
+TDX_CCTV_INCLUDE_HIGHWAY=1
+TDX_CCTV_CITIES=Taipei,NewTaipei,Taoyuan,Taichung,Tainan,Kaohsiung
+TDX_CCTV_MAX_SOURCES=1200
+```
+
+TDX 會員與 API 金鑰申請入口：<https://tdx.transportdata.tw/>
+
+> Client Secret 只由本機 server 使用。不要 commit `.env`，也不要把 Secret 放到 GitHub。
+
 ## 🧩 繁中版更新紀錄
+
+### 1.0.2
+- 新增 Taiwan TDX CCTV provider（Freeway / Highway / major cities）。
+- 新增 TDX OAuth Client Credentials，自動取得並快取 access token。
+- Provider Settings 可直接輸入 TDX Client Id / Client Secret。
+- 新增 MJPEG 即時攝影機顯示與第一幀預覽支援。
+- 新增 Taipei 導航預設。
 
 ### 1.0.1
 - 修正繁中 MutationObserver 可能反覆觸發自身、造成啟動畫面卡住的問題。
