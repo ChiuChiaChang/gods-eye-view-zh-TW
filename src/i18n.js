@@ -2,7 +2,7 @@
 // Version: 1.0.0
 // Keeps upstream application logic/data untouched and translates only curated UI text.
 
-export const GEV_ZH_TW_VERSION = '1.0.3';
+export const GEV_ZH_TW_VERSION = '1.0.4';
 export const GEV_LANGUAGE_STORAGE_KEY = 'gev:ui-language:v1';
 
 const TEXT = Object.freeze({
@@ -205,6 +205,11 @@ const TEXT = Object.freeze({
   "🇹🇼 Taiwan CCTV": "🇹🇼 台灣 CCTV",
   "TDX Taiwan + global CCTV": "TDX 台灣 + 全球 CCTV",
   "TDX KEY REQUIRED · open POWER UP": "需要 TDX 金鑰 · 請開啟功能設定",
+  "Taiwan camera catalog returned 0 records": "台灣攝影機清單回傳 0 筆資料",
+  "Taiwan open data loading · TDX optional": "正在載入台灣公開資料 · TDX 為選用",
+  "TAIWAN LIVE": "台灣即時",
+  "TDX enhanced": "TDX 增強",
+  "no key required": "不需金鑰",
   "Taipei": "台北",
   "New Taipei": "新北",
   "Taoyuan": "桃園",
