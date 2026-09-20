@@ -19,6 +19,7 @@ import {
   loadCalgarySourcesFromOpenData,
 } from './sources.js';
 import { loadTdxTaiwanCctvSources } from './tdx.js';
+import { loadTaiwanOpenDataCctvSources } from './taiwanOpenData.js';
 
 /** Env kill switch: unset or anything but "0" means enabled. */
 const envEnabled = (name) => String(process.env[name] || '1').trim() !== '0';
@@ -86,6 +87,11 @@ const LIVE_PACKS = [
     name: 'calgary',
     enabled: () => envEnabled('CCTV_CALGARY_ENABLED'),
     load: loadCalgarySourcesFromOpenData,
+  },
+  {
+    name: 'taiwan-open-data',
+    enabled: () => envEnabled('CCTV_TAIWAN_OPEN_DATA_ENABLED'),
+    load: () => loadTaiwanOpenDataCctvSources(),
   },
   {
     name: 'taiwan-tdx',
