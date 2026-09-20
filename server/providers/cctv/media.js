@@ -461,6 +461,79 @@ export function cctvUpstreamUserAgent(url) {
 }
 
 /**
+ * Read the first JPEG frame from a registered MJPEG stream.
+ *
+ * Chrome can display MJPEG in an <img>, but the CCTV cards and still-frame
+ * projection path need one bounded JPEG response. This parser reads only until
+ * the first JPEG EOI marker and then cancels the live upstream body.
+ */
+export async function fetchMjpegFrameFromUpstream(
+  url,
+  {
+    fetchImpl = fetch,
+    timeoutMs = CCTV_FRAME_FETCH_TIMEOUT_MS,
+    maxBytes = CCTV_FRAME_MAX_BODY_BYTES,
+  } = {},
+) {
+  if (!url || !/^https?:\/\//i.test(url)) return null;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => {
+    controller.abort(
+      new DOMException('CCTV MJPEG frame fetch timed out', 'TimeoutError'),
+    );
+  }, timeoutMs);
+  try {
+    const upstream = await fetchWithinHost(
+      url,
+      {
+        headers: { 'User-Agent': cctvUpstreamUserAgent(url) },
+        signal: controller.signal,
+      },
+      fetchImpl,
+    );
+    if (!upstream?.ok || !upstream.body) return null;
+
+    const reader = upstream.body.getReader?.();
+    if (!reader) return null;
+    let buffer = Buffer.alloc(0);
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer = Buffer.concat([buffer, Buffer.from(value)]);
+        if (buffer.length > maxBytes) return null;
+
+        const start = buffer.indexOf(Buffer.from([0xff, 0xd8]));
+        if (start < 0) {
+          // Multipart headers can precede the JPEG. Retain only a small tail
+          // until SOI appears so malformed streams cannot grow unbounded.
+          if (buffer.length > 65536) buffer = buffer.subarray(buffer.length - 4);
+          continue;
+        }
+        const end = buffer.indexOf(Buffer.from([0xff, 0xd9]), start + 2);
+        if (end < 0) continue;
+        const body = buffer.subarray(start, end + 2);
+        if (body.length < 4 || body.length > maxBytes) return null;
+        return { ok: true, body: Buffer.from(body), contentType: 'image/jpeg' };
+      }
+      return null;
+    } finally {
+      try {
+        await reader.cancel();
+      } catch {
+        /* stream already closed */
+      }
+      reader.releaseLock?.();
+    }
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+    controller.abort();
+  }
+}
+
+/**
  * Fetch one upstream CCTV image within the frame-refresh budget.
  *
  * A timeout is treated like every other upstream miss so the caller can
