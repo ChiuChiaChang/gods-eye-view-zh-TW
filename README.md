@@ -2,7 +2,7 @@
 
 這是 [bilawalsidhu/gods-eye-view](https://github.com/bilawalsidhu/gods-eye-view) 的繁體中文 Fork。核心地圖、資料來源與功能維持上游設計，另外加入 **繁體中文 UI（預設）** 與 **English 語言切換**。
 
-**繁中 UI 版本：1.0.2**
+**繁中 UI 版本：1.0.3**
 
 ## 🚀 繁中版快速安裝
 
@@ -55,6 +55,11 @@ TDX 會員與 API 金鑰申請入口：<https://tdx.transportdata.tw/>
 > Client Secret 只由本機 server 使用。不要 commit `.env`，也不要把 Secret 放到 GitHub。
 
 ## 🧩 繁中版更新紀錄
+
+### 1.0.3
+- 將 `🇹🇼 台灣 CCTV` 移到資料圖層上方，打開面板即可看到。
+- CCTV row 會顯示 `TDX KEY REQUIRED` 或 `TDX READY · N Taiwan cameras`。
+- TDX 狀態由 server 回報，不會暴露 Client Secret。
 
 ### 1.0.2
 - 新增 Taiwan TDX CCTV provider（Freeway / Highway / major cities）。
