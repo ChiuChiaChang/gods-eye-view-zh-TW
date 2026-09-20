@@ -2,7 +2,7 @@
 // Version: 1.0.0
 // Keeps upstream application logic/data untouched and translates only curated UI text.
 
-export const GEV_ZH_TW_VERSION = '1.0.0';
+export const GEV_ZH_TW_VERSION = '1.0.1';
 export const GEV_LANGUAGE_STORAGE_KEY = 'gev:ui-language:v1';
 
 const TEXT = Object.freeze({
@@ -392,10 +392,20 @@ function renderLanguageToggle() {
   const button = document.getElementById('gev-language-toggle');
   if (!button) return;
   const isZh = currentLanguage === 'zh-TW';
-  button.textContent = isZh ? '繁中 · EN' : 'EN · 繁中';
-  button.setAttribute('aria-label', isZh ? '切換為 English' : 'Switch to Traditional Chinese');
-  button.title = isZh ? 'Switch to English' : '切換為繁體中文';
-  button.dataset.language = currentLanguage;
+  const text = isZh ? '繁中 · EN' : 'EN · 繁中';
+  const ariaLabel = isZh ? '切換為 English' : 'Switch to Traditional Chinese';
+  const title = isZh ? 'Switch to English' : '切換為繁體中文';
+
+  // Do not write identical DOM values. MutationObserver watches this page, and
+  // repeatedly setting the same text/attributes can create a self-sustaining
+  // mutation loop that starves application startup.
+  if (button.textContent !== text) button.textContent = text;
+  if (button.getAttribute('aria-label') !== ariaLabel)
+    button.setAttribute('aria-label', ariaLabel);
+  if (button.getAttribute('title') !== title)
+    button.setAttribute('title', title);
+  if (button.dataset.language !== currentLanguage)
+    button.dataset.language = currentLanguage;
 }
 
 function installToggle() {
@@ -496,7 +506,10 @@ export function initTraditionalChineseUi() {
           continue;
         }
         if (mutation.type === 'attributes') {
-          processAttribute(mutation.target, mutation.attributeName);
+          // The language switch owns its own accessible labels. Never feed its
+          // mutations back into the localization observer.
+          if (mutation.target?.id !== 'gev-language-toggle')
+            processAttribute(mutation.target, mutation.attributeName);
           continue;
         }
         for (const node of mutation.addedNodes) {
@@ -505,7 +518,6 @@ export function initTraditionalChineseUi() {
             processElement(node);
         }
       }
-      renderLanguageToggle();
     } finally {
       applying = false;
     }
