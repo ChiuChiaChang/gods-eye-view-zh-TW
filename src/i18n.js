@@ -2,7 +2,7 @@
 // Version: 1.0.0
 // Keeps upstream application logic/data untouched and translates only curated UI text.
 
-export const GEV_ZH_TW_VERSION = '1.0.4';
+export const GEV_ZH_TW_VERSION = '1.0.5';
 export const GEV_LANGUAGE_STORAGE_KEY = 'gev:ui-language:v1';
 
 const TEXT = Object.freeze({
