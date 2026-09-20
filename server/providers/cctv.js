@@ -8,6 +8,7 @@ import {
   buildSyntheticCctvSvg,
   proxyMediaResponse,
   fetchCctvImageFromUpstream,
+  fetchMjpegFrameFromUpstream,
   fetchTxdotSnapshot,
   fetchCctvMediaUpstream,
   watchDownstreamClose,
@@ -357,10 +358,13 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
             ? source?.url
             : '');
 
+        const sourceFeedType = normalizeFeedType(source?.feedType);
         const upstreamImage =
           source?.sourceKind === 'txdot-its'
             ? await fetchTxdotSnapshot(upstreamCandidate)
-            : await fetchCctvImageFromUpstream(upstreamCandidate);
+            : sourceFeedType === 'mjpeg'
+              ? await fetchMjpegFrameFromUpstream(upstreamCandidate)
+              : await fetchCctvImageFromUpstream(upstreamCandidate);
         if (upstreamImage?.ok) {
           setHealth(cameraId, {
             status: 'ok',
