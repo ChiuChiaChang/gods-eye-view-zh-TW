@@ -2,7 +2,7 @@
 
 這是 [bilawalsidhu/gods-eye-view](https://github.com/bilawalsidhu/gods-eye-view) 的繁體中文 Fork。核心地圖、資料來源與功能維持上游設計，另外加入 **繁體中文 UI（預設）** 與 **English 語言切換**。
 
-**繁中 UI 版本：1.0.4**
+**繁中 UI 版本：1.0.5**
 
 ## 🚀 繁中版快速安裝
 
@@ -55,6 +55,12 @@ TDX 會員與 API 金鑰申請入口：<https://tdx.transportdata.tw/>
 > Client Secret 只由本機 server 使用。不要 commit `.env`，也不要把 Secret 放到 GitHub。
 
 ## 🧩 繁中版更新紀錄
+
+### 1.0.5
+- 修正台灣 CCTV 幾乎只出現在南部的問題。
+- Camera ID 改為 `ArcGIS layer + provider camera id`，不同縣市相同的 CCTVID 不再互相覆蓋。
+- 13 個交通部 CCTV layer 改採公平 round-robin 配額，避免屏東／高雄或單一來源吃掉全部 Camera 名額。
+- 增加北部、中部、東部 anchor，國道／公總資料的取樣分布更平均。
 
 ### 1.0.4
 - 新增交通部公開 GIS CCTV provider，**不需要 TDX Client Id / Secret** 即可載入台灣 CCTV。
