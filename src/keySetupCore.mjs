@@ -14,7 +14,7 @@
 /** Longest accepted key/token value. Real provider keys are all far shorter. */
 export const KEY_SETUP_VALUE_LIMIT = 512;
 
-/** Most env vars accepted in one save. The registry defines ten. */
+/** Most env vars accepted in one save. The registry defines the supported provider credentials. */
 export const KEY_SETUP_UPDATE_LIMIT = 16;
 
 /** Header line written above keys the panel appends to a .env file. */
@@ -79,6 +79,14 @@ export const KEY_SETUP_KEYS = Object.freeze([
     unlocks: 'Real live traffic (keyless runs a simulation)',
     getUrl: 'https://developer.tomtom.com',
     envVars: Object.freeze(['TOMTOM_API_KEY']),
+    tier: 'free',
+  }),
+  Object.freeze({
+    id: 'tdx',
+    title: 'TAIWAN TDX',
+    unlocks: 'Taiwan live traffic cameras — freeways, highways and major cities',
+    getUrl: 'https://tdx.transportdata.tw/',
+    envVars: Object.freeze(['TDX_CLIENT_ID', 'TDX_CLIENT_SECRET']),
     tier: 'free',
   }),
   Object.freeze({
