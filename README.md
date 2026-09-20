@@ -2,7 +2,7 @@
 
 這是 [bilawalsidhu/gods-eye-view](https://github.com/bilawalsidhu/gods-eye-view) 的繁體中文 Fork。核心地圖、資料來源與功能維持上游設計，另外加入 **繁體中文 UI（預設）** 與 **English 語言切換**。
 
-**繁中 UI 版本：1.0.0**
+**繁中 UI 版本：1.0.1**
 
 ## 🚀 繁中版快速安裝
 
@@ -19,6 +19,12 @@ npm run dev
 瀏覽器開啟 **http://localhost:4173**。介面預設為繁體中文，右上角可使用 **「繁中 · EN」** 切換語言，選擇會保存在瀏覽器中。
 
 > 本 Fork 保留原專案授權與來源聲明。上游專案的新功能可透過 GitHub 的 **Sync fork** 同步；若上游 UI 有新增英文文字，繁中語系層可以再補上翻譯。
+
+## 🧩 繁中版更新紀錄
+
+### 1.0.1
+- 修正繁中 MutationObserver 可能反覆觸發自身、造成啟動畫面卡住的問題。
+- 語言切換按鈕只在內容真的變更時才更新 DOM，避免阻塞 God’s Eye View 初始化。
 
 ---
 
