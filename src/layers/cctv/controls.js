@@ -13,11 +13,13 @@ export function createControls({ state: layerState, services, parts, source }) {
   const methods = {
     id: 'cctv',
 
-    name: 'CCTV',
+    name: 'Taiwan CCTV',
 
     icon: '📹',
 
-    source: 'CCTV + Street View fallback',
+    source: 'TDX Taiwan + global CCTV',
+
+    requiresKeyId: 'tdx',
 
     updateInterval: DEFAULT_UPDATE_INTERVAL_MS,
 
@@ -237,10 +239,18 @@ export function createControls({ state: layerState, services, parts, source }) {
      * @returns {{ count: number, lastUpdate: number|null, error: string|null, loading: boolean, loadingLoaded: number, loadingTotal: number }}
      */
     getStats() {
+      const tdxReady = layerState._tdxConfigured === true;
+      const tdxCount = Math.max(0, Number(layerState._tdxCount) || 0);
       return {
         count: layerState._count,
         lastUpdate: layerState._lastUpdate,
         error: layerState._lastError,
+        keyRequired: !tdxReady,
+        loadingLabel: tdxReady
+          ? `TDX READY · ${tdxCount} Taiwan cameras`
+          : 'TDX KEY REQUIRED · open POWER UP',
+        tdxConfigured: tdxReady,
+        tdxCount,
         loading: layerState._geoLoading,
         loadingLoaded: Math.min(
           layerState._geoLoadDone,
